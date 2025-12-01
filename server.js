@@ -10,7 +10,7 @@ app.use(cors());
 
 // ============= CONFIG MONGODB =============
 const MONGO_URI =
-  process.env.MONGO_URI ||
+  process.env.MONGO_URI || process.env.MONGO_URL ||
   "mongodb+srv://USERNAME:PASSWORD@CLUSTER/nama_db?retryWrites=true&w=majority";
 
 // koneksi ke MongoDB
