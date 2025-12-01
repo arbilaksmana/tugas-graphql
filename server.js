@@ -23,10 +23,10 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // ============= MODEL MONGOOSE =============
-const bookSchema = new mongoose.Schema(
+const movieSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
-    author: { type: String, required: true },
+    director: { type: String, required: true },
     genre: { type: String, required: true },
   },
   {
@@ -34,86 +34,86 @@ const bookSchema = new mongoose.Schema(
   }
 );
 
-const Book = mongoose.model("Book", bookSchema);
+const Movie = mongoose.model("Movie", movieSchema);
 
 // ============= SCHEMA GRAPHQL =============
-// Topik: Buku
+// Topik: Film
 const schema = buildSchema(`
-  type Book {
+  type Movie {
     id: ID
     title: String
-    author: String
+    director: String
     genre: String
   }
 
   type Query {
-    books: [Book]
-    book(id: ID!): Book
-    searchBooks(title: String!): [Book]
+    movies: [Movie]
+    movie(id: ID!): Movie
+    searchMovies(title: String!): [Movie]
   }
 
   type Mutation {
-    addBook(title: String!, author: String!, genre: String!): Book
-    deleteBook(id: ID!): String
+    addMovie(title: String!, director: String!, genre: String!): Movie
+    deleteMovie(id: ID!): String
   }
 `);
 
 // ============= RESOLVERS =============
 const root = {
-  // ambil semua buku
-  books: async () => {
-    const books = await Book.find();
+  // ambil semua film
+  movies: async () => {
+    const movies = await Movie.find();
     // mongoose pakai _id, tapi GraphQL pakai id → otomatis di-handle
-    return books.map((b) => ({
-      id: b._id.toString(),
-      title: b.title,
-      author: b.author,
-      genre: b.genre,
+    return movies.map((m) => ({
+      id: m._id.toString(),
+      title: m.title,
+      director: m.director,
+      genre: m.genre,
     }));
   },
 
-  // ambil buku by id
-  book: async ({ id }) => {
-    const b = await Book.findById(id);
-    if (!b) return null;
+  // ambil film by id
+  movie: async ({ id }) => {
+    const m = await Movie.findById(id);
+    if (!m) return null;
     return {
-      id: b._id.toString(),
-      title: b.title,
-      author: b.author,
-      genre: b.genre,
+      id: m._id.toString(),
+      title: m.title,
+      director: m.director,
+      genre: m.genre,
     };
   },
 
-  // cari buku berdasarkan judul (case-insensitive, partial match)
-  searchBooks: async ({ title }) => {
-    const books = await Book.find({
+  // cari film berdasarkan judul (case-insensitive, partial match)
+  searchMovies: async ({ title }) => {
+    const movies = await Movie.find({
       title: { $regex: title, $options: 'i' } // case-insensitive search
     });
-    return books.map((b) => ({
-      id: b._id.toString(),
-      title: b.title,
-      author: b.author,
-      genre: b.genre,
+    return movies.map((m) => ({
+      id: m._id.toString(),
+      title: m.title,
+      director: m.director,
+      genre: m.genre,
     }));
   },
 
-  // tambah buku baru
-  addBook: async ({ title, author, genre }) => {
-    const newBook = new Book({ title, author, genre });
-    const saved = await newBook.save();
+  // tambah film baru
+  addMovie: async ({ title, director, genre }) => {
+    const newMovie = new Movie({ title, director, genre });
+    const saved = await newMovie.save();
     return {
       id: saved._id.toString(),
       title: saved.title,
-      author: saved.author,
+      director: saved.director,
       genre: saved.genre,
     };
   },
 
-  // hapus buku
-  deleteBook: async ({ id }) => {
-    const deleted = await Book.findByIdAndDelete(id);
-    if (!deleted) return "Buku tidak ditemukan";
-    return `Buku dengan ID ${id} berhasil dihapus`;
+  // hapus film
+  deleteMovie: async ({ id }) => {
+    const deleted = await Movie.findByIdAndDelete(id);
+    if (!deleted) return "Film tidak ditemukan";
+    return `Film dengan ID ${id} berhasil dihapus`;
   },
 };
 
@@ -131,6 +131,6 @@ app.use(
 const PORT = process.env.PORT || 4003;
 
 app.listen(PORT, () => {
-  console.log(`GraphQL Book API running on port ${PORT}`);
+  console.log(`GraphQL Movie API running on port ${PORT}`);
   console.log(`GraphiQL: http://localhost:${PORT}/graphql`);
 });

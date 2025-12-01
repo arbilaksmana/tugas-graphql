@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Library Manager - GraphQL</title>
+  <title>Movie Library - GraphQL</title>
 
   <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -316,31 +316,31 @@
     <!-- Header -->
     <header>
       <div class="logo">
-        <i class="fa-solid fa-book-open-reader"></i>
-        Library Manager
+        <i class="fa-solid fa-film"></i>
+        Movie Library
       </div>
     </header>
 
     <div class="main-content">
-      <!-- Sidebar: Add Book Form -->
+      <!-- Sidebar: Add Movie Form -->
       <aside class="sidebar">
         <div class="card">
-          <h2><i class="fa-solid fa-plus-circle"></i> Add New Book</h2>
-          <form onsubmit="event.preventDefault(); addBook();">
+          <h2><i class="fa-solid fa-plus-circle"></i> Add New Movie</h2>
+          <form onsubmit="event.preventDefault(); addMovie();">
             <div class="form-group">
               <label>Title</label>
-              <input type="text" id="title" placeholder="e.g. The Hobbit" required>
+              <input type="text" id="title" placeholder="e.g. Inception" required>
             </div>
             <div class="form-group">
-              <label>Author</label>
-              <input type="text" id="author" placeholder="e.g. J.R.R. Tolkien" required>
+              <label>Director</label>
+              <input type="text" id="director" placeholder="e.g. Christopher Nolan" required>
             </div>
             <div class="form-group">
               <label>Genre</label>
-              <input type="text" id="genre" placeholder="e.g. Fantasy" required>
+              <input type="text" id="genre" placeholder="e.g. Sci-Fi" required>
             </div>
             <button type="submit" class="btn-primary">
-              <i class="fa-solid fa-paper-plane"></i> Add Book
+              <i class="fa-solid fa-paper-plane"></i> Add Movie
             </button>
           </form>
         </div>
@@ -351,16 +351,16 @@
         <!-- Search Bar -->
         <div class="search-container">
           <i class="fa-solid fa-magnifying-glass search-icon"></i>
-          <input type="text" class="search-input" id="search-input" placeholder="Search books by title..."
+          <input type="text" class="search-input" id="search-input" placeholder="Search movies by title..."
             onkeyup="handleSearch(event)">
         </div>
 
-        <!-- Book Grid -->
-        <div id="book-grid" class="book-grid">
-          <!-- Books will be injected here -->
+        <!-- Movie Grid -->
+        <div id="movie-grid" class="book-grid">
+          <!-- Movies will be injected here -->
           <div class="empty-state">
             <i class="fa-solid fa-spinner fa-spin"></i>
-            <p>Loading library...</p>
+            <p>Loading movies...</p>
           </div>
         </div>
       </main>
@@ -378,23 +378,23 @@
     const url = 'https://tugas-graphql-production.up.railway.app/graphql';
 
     // --- State Management ---
-    let allBooks = [];
+    let allMovies = [];
 
     // --- Initialization ---
     window.addEventListener('load', () => {
-      loadAllBooks();
+      loadAllMovies();
     });
 
     // --- Core Functions ---
 
-    // 1. Load All Books
-    function loadAllBooks() {
+    // 1. Load All Movies
+    function loadAllMovies() {
       const query = `
           {
-            books {
+            movies {
               id
               title
-              author
+              director
               genre
             }
           }
@@ -402,13 +402,13 @@
 
       fetchGraphQL(query)
         .then(data => {
-          allBooks = data.books;
-          renderBooks(allBooks);
+          allMovies = data.movies;
+          renderMovies(allMovies);
         })
         .catch(err => showToast(err.message, 'error'));
     }
 
-    // 2. Search Books (Backend)
+    // 2. Search Movies (Backend)
     let searchTimeout;
     function handleSearch(event) {
       clearTimeout(searchTimeout);
@@ -417,27 +417,27 @@
       // Debounce search to avoid too many requests
       searchTimeout = setTimeout(() => {
         if (!title) {
-          loadAllBooks(); // Reset if empty
+          loadAllMovies(); // Reset if empty
           return;
         }
-        searchBooks(title);
+        searchMovies(title);
       }, 500);
     }
 
-    function searchBooks(title) {
+    function searchMovies(title) {
       const query = `
           {
-            searchBooks(title: "${escapeGraphQL(title)}") {
+            searchMovies(title: "${escapeGraphQL(title)}") {
               id
               title
-              author
+              director
               genre
             }
           }
         `;
 
       // Show loading state
-      document.getElementById('book-grid').innerHTML = `
+      document.getElementById('movie-grid').innerHTML = `
           <div class="empty-state">
             <i class="fa-solid fa-spinner fa-spin"></i>
             <p>Searching...</p>
@@ -446,25 +446,25 @@
 
       fetchGraphQL(query)
         .then(data => {
-          renderBooks(data.searchBooks);
+          renderMovies(data.searchMovies);
         })
         .catch(err => showToast(err.message, 'error'));
     }
 
-    // 3. Add Book
-    function addBook() {
+    // 3. Add Movie
+    function addMovie() {
       const title = document.getElementById('title').value.trim();
-      const author = document.getElementById('author').value.trim();
+      const director = document.getElementById('director').value.trim();
       const genre = document.getElementById('genre').value.trim();
 
-      if (!title || !author || !genre) return;
+      if (!title || !director || !genre) return;
 
       const mutation = `
           mutation {
-            addBook(title: "${escapeGraphQL(title)}", author: "${escapeGraphQL(author)}", genre: "${escapeGraphQL(genre)}") {
+            addMovie(title: "${escapeGraphQL(title)}", director: "${escapeGraphQL(director)}", genre: "${escapeGraphQL(genre)}") {
               id
               title
-              author
+              director
               genre
             }
           }
@@ -472,31 +472,31 @@
 
       fetchGraphQL(mutation)
         .then(data => {
-          showToast(`Added "${data.addBook.title}" successfully!`, 'success');
+          showToast(`Added "${data.addMovie.title}" successfully!`, 'success');
           // Clear form
           document.getElementById('title').value = '';
-          document.getElementById('author').value = '';
+          document.getElementById('director').value = '';
           document.getElementById('genre').value = '';
           // Refresh list
-          loadAllBooks();
+          loadAllMovies();
         })
         .catch(err => showToast(err.message, 'error'));
     }
 
-    // 4. Delete Book
-    function deleteBook(id) {
-      if (!confirm('Are you sure you want to delete this book?')) return;
+    // 4. Delete Movie
+    function deleteMovie(id) {
+      if (!confirm('Are you sure you want to delete this movie?')) return;
 
       const mutation = `
           mutation {
-            deleteBook(id: "${id}")
+            deleteMovie(id: "${id}")
           }
         `;
 
       fetchGraphQL(mutation)
         .then(() => {
-          showToast('Book deleted successfully', 'success');
-          loadAllBooks(); // Refresh list
+          showToast('Movie deleted successfully', 'success');
+          loadAllMovies(); // Refresh list
         })
         .catch(err => showToast(err.message, 'error'));
     }
@@ -523,31 +523,31 @@
       }
     }
 
-    // Render Books to Grid
-    function renderBooks(books) {
-      const grid = document.getElementById('book-grid');
+    // Render Movies to Grid
+    function renderMovies(movies) {
+      const grid = document.getElementById('movie-grid');
       grid.innerHTML = '';
 
-      if (!books || books.length === 0) {
+      if (!movies || movies.length === 0) {
         grid.innerHTML = `
             <div class="empty-state">
               <i class="fa-solid fa-box-open"></i>
-              <p>No books found.</p>
+              <p>No movies found.</p>
             </div>
           `;
         return;
       }
 
-      books.forEach(book => {
+      movies.forEach(movie => {
         const card = document.createElement('div');
         card.className = 'book-card';
         card.innerHTML = `
-            <span class="book-genre">${book.genre}</span>
-            <h3 class="book-title">${book.title}</h3>
-            <p class="book-author">by ${book.author}</p>
+            <span class="book-genre">${movie.genre}</span>
+            <h3 class="book-title">${movie.title}</h3>
+            <p class="book-author">by ${movie.director}</p>
             <div class="book-footer">
-              <span class="book-id">ID: ...${book.id.slice(-6)}</span>
-              <button class="btn-delete" onclick="deleteBook('${book.id}')" title="Delete Book">
+              <span class="book-id">ID: ...${movie.id.slice(-6)}</span>
+              <button class="btn-delete" onclick="deleteMovie('${movie.id}')" title="Delete Movie">
                 <i class="fa-solid fa-trash"></i>
               </button>
             </div>
