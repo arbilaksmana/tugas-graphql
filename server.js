@@ -49,6 +49,7 @@ const schema = buildSchema(`
   type Query {
     books: [Book]
     book(id: ID!): Book
+    searchBooks(title: String!): [Book]
   }
 
   type Mutation {
@@ -81,6 +82,19 @@ const root = {
       author: b.author,
       genre: b.genre,
     };
+  },
+
+  // cari buku berdasarkan judul (case-insensitive, partial match)
+  searchBooks: async ({ title }) => {
+    const books = await Book.find({
+      title: { $regex: title, $options: 'i' } // case-insensitive search
+    });
+    return books.map((b) => ({
+      id: b._id.toString(),
+      title: b.title,
+      author: b.author,
+      genre: b.genre,
+    }));
   },
 
   // tambah buku baru
